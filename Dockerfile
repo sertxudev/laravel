@@ -7,6 +7,8 @@ WORKDIR /var/www
 # Copy the application files to the container.
 COPY --chown=www-data:www-data . /var/www
 
+RUN cp .env.example .env
+
 # Install PHP dependencies using Composer.
 # Use --no-scripts to prevent Composer from running scripts during the install process.
 # This is often safer in Dockerfiles, as it prevents potential issues with missing
