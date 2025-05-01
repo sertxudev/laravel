@@ -7,6 +7,7 @@ COPY . /var/www/html
 
 RUN cp /var/www/html/.env.example /var/www/html/.env
 
-RUN composer update --no-progress --prefer-dist
+RUN touch /var/www/html/storage/logs/laravel.log && \
+    composer update --no-progress --prefer-dist
 
 RUN php artisan key:generate
