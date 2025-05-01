@@ -14,6 +14,13 @@ COPY . /var/www
 # commands (key:generate, migrate) explicitly later.
 RUN composer install --no-scripts --no-interaction --prefer-dist
 
+# Set file permissions for the storage and bootstrap/cache directories.
+# This is crucial for Laravel to function correctly.
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+RUN find /var/www/storage -type d -exec chmod 775 {} \;
+RUN find /var/www/storage -type f -exec chmod 664 {} \;
+RUN chmod -R 775 /var/www/bootstrap/cache
+
 # Generate the application key.  We do this *before* optimizing the autoloader.
 # If you have environment variables that affect key generation, set them
 # with ENV before this line.
@@ -27,13 +34,6 @@ RUN php artisan migrate --force --no-interaction
 # Optimize the autoloader.  This can significantly improve performance in production.
 RUN php artisan optimize:clear
 RUN php artisan optimize
-
-# Set file permissions for the storage and bootstrap/cache directories.
-# This is crucial for Laravel to function correctly.
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
-RUN find /var/www/storage -type d -exec chmod 775 {} \;
-RUN find /var/www/storage -type f -exec chmod 664 {} \;
-RUN chmod -R 775 /var/www/bootstrap/cache
 
 # Expose port 80 for the Nginx server.
 EXPOSE 80
