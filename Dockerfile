@@ -1,13 +1,46 @@
-FROM serversideup/php:8.4-fpm-nginx-alpine
+# Use the serversideup/php:8.4-fpm-nginx image as the base image.
+FROM serversideup/php:8.4-fpm-nginx
 
-ENV SSL_MODE="off"
-ENV PHP_OPCACHE_ENABLE=1
+# Set the working directory to /var/www.
+WORKDIR /var/www
 
-COPY . /var/www/html --chown=www-data:www-data
+# Copy the application files to the container.
+COPY . /var/www
 
-RUN cp /var/www/html/.env.example /var/www/html/.env
+# Install PHP dependencies using Composer.
+# Use --no-scripts to prevent Composer from running scripts during the install process.
+# This is often safer in Dockerfiles, as it prevents potential issues with missing
+# dependencies or environment configurations.  We'll run the necessary artisan
+# commands (key:generate, migrate) explicitly later.
+RUN composer install --no-scripts --no-interaction --prefer-dist
 
-RUN touch /var/www/html/storage/logs/laravel.log && \
-    composer update --no-progress --prefer-dist
+# Generate the application key.  We do this *before* optimizing the autoloader.
+# If you have environment variables that affect key generation, set them
+# with ENV before this line.
+RUN php artisan key:generate --no-interaction
 
-RUN php artisan key:generate
+# Run database migrations.  This assumes your database is set up and
+# accessible.  You might need to adjust the DB_* environment variables here
+# or in your docker-compose.yml file.
+RUN php artisan migrate --force --no-interaction
+
+# Optimize the autoloader.  This can significantly improve performance in production.
+RUN php artisan optimize:clear
+RUN php artisan optimize
+
+# Set file permissions for the storage and bootstrap/cache directories.
+# This is crucial for Laravel to function correctly.
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+RUN find /var/www/storage -type d -exec chmod 775 {} \;
+RUN find /var/www/storage -type f -exec chmod 664 {} \;
+RUN chmod -R 775 /var/www/bootstrap/cache
+
+# Expose port 80 for the Nginx server.
+EXPOSE 80
+
+# The base image already configures Nginx and PHP-FPM, so we don't need to do that here.
+# CMD ["php-fpm", "-F"] # Not needed, the base image handles this.
+
+# Optional:  If you need to run any other commands, such as seeding the database,
+# you can add them here.  For example:
+# RUN php artisan db:seed --force
