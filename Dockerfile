@@ -5,7 +5,7 @@ FROM serversideup/php:8.4-fpm-nginx
 WORKDIR /var/www
 
 # Copy the application files to the container.
-COPY . /var/www
+COPY --chown=www-data:www-data . /var/www
 
 # Install PHP dependencies using Composer.
 # Use --no-scripts to prevent Composer from running scripts during the install process.
@@ -13,13 +13,6 @@ COPY . /var/www
 # dependencies or environment configurations.  We'll run the necessary artisan
 # commands (key:generate, migrate) explicitly later.
 RUN composer install --no-scripts --no-interaction --prefer-dist
-
-# Set file permissions for the storage and bootstrap/cache directories.
-# This is crucial for Laravel to function correctly.
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
-RUN find /var/www/storage -type d -exec chmod 775 {} \;
-RUN find /var/www/storage -type f -exec chmod 664 {} \;
-RUN chmod -R 775 /var/www/bootstrap/cache
 
 # Generate the application key.  We do this *before* optimizing the autoloader.
 # If you have environment variables that affect key generation, set them
