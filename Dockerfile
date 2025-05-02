@@ -2,10 +2,10 @@
 FROM serversideup/php:8.4-fpm-nginx
 
 # Set the working directory to /var/www.
-WORKDIR /var/www
+WORKDIR /var/wwwhtml
 
 # Copy the application files to the container.
-COPY --chown=www-data:www-data . /var/www
+COPY --chown=www-data:www-data . /var/www/html
 
 RUN cp .env.example .env
 
@@ -31,7 +31,7 @@ RUN php artisan optimize:clear
 RUN php artisan optimize
 
 # Expose port 80 for the Nginx server.
-EXPOSE 80
+# EXPOSE 8080
 
 # The base image already configures Nginx and PHP-FPM, so we don't need to do that here.
 # CMD ["php-fpm", "-F"] # Not needed, the base image handles this.
