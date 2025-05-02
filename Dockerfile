@@ -1,13 +1,17 @@
 # Use the serversideup/php:8.4-fpm-nginx image as the base image.
 FROM serversideup/php:8.4-fpm-nginx
 
+ENV SSL_MODE="off"
+ENV PHP_OPCACHE_ENABLE=1
+ENV AUTORUN_ENABLED=1
+
 # Set the working directory to /var/www.
-WORKDIR /var/wwwhtml
+# WORKDIR /var/www/html
 
 # Copy the application files to the container.
 COPY --chown=www-data:www-data . /var/www/html
 
-RUN cp .env.example .env
+# RUN cp .env.example .env
 
 # Install PHP dependencies using Composer.
 # Use --no-scripts to prevent Composer from running scripts during the install process.
@@ -24,11 +28,11 @@ RUN php artisan key:generate --no-interaction
 # Run database migrations.  This assumes your database is set up and
 # accessible.  You might need to adjust the DB_* environment variables here
 # or in your docker-compose.yml file.
-RUN php artisan migrate --force --no-interaction
+# RUN php artisan migrate --force --no-interaction
 
 # Optimize the autoloader.  This can significantly improve performance in production.
-RUN php artisan optimize:clear
-RUN php artisan optimize
+# RUN php artisan optimize:clear
+# RUN php artisan optimize
 
 # Expose port 80 for the Nginx server.
 # EXPOSE 8080
