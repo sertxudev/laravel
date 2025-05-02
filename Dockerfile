@@ -11,7 +11,7 @@ ENV AUTORUN_ENABLED=1
 # Copy the application files to the container.
 COPY --chown=www-data:www-data . /var/www/html
 
-# RUN cp .env.example .env
+RUN cp .env.example .env
 
 # Install PHP dependencies using Composer.
 # Use --no-scripts to prevent Composer from running scripts during the install process.
