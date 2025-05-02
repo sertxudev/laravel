@@ -28,7 +28,7 @@ RUN php artisan key:generate --no-interaction
 # Run database migrations.  This assumes your database is set up and
 # accessible.  You might need to adjust the DB_* environment variables here
 # or in your docker-compose.yml file.
-# RUN php artisan migrate --force --no-interaction
+RUN php artisan migrate --force --no-interaction
 
 # Optimize the autoloader.  This can significantly improve performance in production.
 # RUN php artisan optimize:clear
