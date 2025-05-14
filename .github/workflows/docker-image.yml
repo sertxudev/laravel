@@ -13,7 +13,7 @@ env:
 jobs:
 
   build:
-    name: Build Docker image
+    name: Build and Deploy Docker image
     runs-on: ubuntu-latest
     environment: production
       
@@ -40,13 +40,6 @@ jobs:
       - name: Push Docker image
         run: docker push "${REGISTRY}/${IMAGE}:${GITHUB_SHA}"
 
-  deploy:
-    name: Deploy container
-    runs-on: ubuntu-latest
-    environment: production
-    needs: build
-
-    steps:
       - name: Deploy new image
         uses: appleboy/ssh-action@v1.2.2
         with:
