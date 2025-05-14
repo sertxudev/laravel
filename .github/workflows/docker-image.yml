@@ -54,4 +54,4 @@ jobs:
           username: ${{ secrets.KUBERNETES_MASTER_SSH_USER }}
           port: ${{ secrets.KUBERNETES_MASTER_SSH_PORT }}
           key: ${{ secrets.KUBERNETES_MASTER_SSH_KEY }}
-          script: microk8s kubectl set image deployment/${DEPLOYMENT} ${CONTAINER}="${REGISTRY}/${IMAGE}:${GITHUB_SHA}"
+          script: microk8s kubectl set image deployment/${{ env.DEPLOYMENT }} ${{ env.CONTAINER }}="${{ env.REGISTRY }}/${{ env.IMAGE }}:${{ GITHUB_SHA }}"
