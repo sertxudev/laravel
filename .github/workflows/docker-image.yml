@@ -1,5 +1,8 @@
 name: Deploy to Kubernetes cluster
 
+concurrency: 
+  group: production
+  
 on:
   push:
     branches: [ "12.x" ]
