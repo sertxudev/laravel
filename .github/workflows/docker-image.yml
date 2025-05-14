@@ -23,7 +23,7 @@ jobs:
 
       - name: Extract Docker metadata
         id: meta
-        uses: docker/metadata-action@v5 # v5.0.0
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
@@ -44,13 +44,14 @@ jobs:
     name: Deploy container
     runs-on: ubuntu-latest
     environment: production
+    needs: build
 
     steps:
       - name: Deploy new image
         uses: appleboy/ssh-action@v1.2.2
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          port: ${{ secrets.SSH_PORT }}
-          key: ${{ secrets.SSH_KEY }}
+          host: ${{ secrets.KUBERNETES_MASTER_SSH_HOST }}
+          username: ${{ secrets.KUBERNETES_MASTER_SSH_USER }}
+          port: ${{ secrets.KUBERNETES_MASTER_SSH_PORT }}
+          key: ${{ secrets.KUBERNETES_MASTER_SSH_KEY }}
           script: kubectl set image deployment/${DEPLOYMENT} ${CONTAINER}="${REGISTRY}/${IMAGE}:${GITHUB_SHA}"
