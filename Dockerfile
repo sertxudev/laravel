@@ -16,6 +16,8 @@ RUN apk add --no-cache --virtual .build-deps g++ make \
 ### CI: specific to ci (if any)
 FROM build AS ci
 
+# Copy the application files to the container.
+COPY --chown=www-data:www-data . /var/www/html
 
 USER www-data
 
