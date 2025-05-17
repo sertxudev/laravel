@@ -1,45 +1,36 @@
+### BASE: things required for all - dev, ci, prod.
 # Use the serversideup/php:8.4-fpm-nginx image as the base image.
-FROM serversideup/php:8.4-fpm-nginx
+FROM serversideup/php:8.4-fpm-nginx as base
 
-ENV SSL_MODE="off"
-ENV PHP_OPCACHE_ENABLE=1
-ENV AUTORUN_ENABLED=1
+USER root
+RUN install-php-extensions intl bcmath
 
-# Set the working directory to /var/www.
-# WORKDIR /var/www/html
+### BUILD: things required for dev & ci.
+FROM base AS build
 
-# Copy the application files to the container.
-COPY --chown=www-data:www-data . /var/www/html
+RUN apk add --no-cache --virtual .build-deps g++ make \
+    && apk add --no-cache nodejs npm python3 \
+    && ln -sf /usr/bin/python3 /usr/bin/python \
+    && apk del .build-deps
 
-RUN cp .env.example .env
+### CI: specific to ci (if any)
+FROM build AS ci
 
-# Install PHP dependencies using Composer.
-# Use --no-scripts to prevent Composer from running scripts during the install process.
-# This is often safer in Dockerfiles, as it prevents potential issues with missing
-# dependencies or environment configurations.  We'll run the necessary artisan
-# commands (key:generate, migrate) explicitly later.
-RUN composer install --no-scripts --no-interaction --prefer-dist
 
-# Generate the application key.  We do this *before* optimizing the autoloader.
-# If you have environment variables that affect key generation, set them
-# with ENV before this line.
-RUN php artisan key:generate --no-interaction
+USER www-data
 
-# Run database migrations.  This assumes your database is set up and
-# accessible.  You might need to adjust the DB_* environment variables here
-# or in your docker-compose.yml file.
-RUN php artisan migrate --force --no-interaction
+### DEV: specific to local (if any)
+FROM build AS dev
 
-# Optimize the autoloader.  This can significantly improve performance in production.
-# RUN php artisan optimize:clear
-# RUN php artisan optimize
+USER www-data
 
-# Expose port 80 for the Nginx server.
-# EXPOSE 8080
+### PROD - for deployment
+FROM base AS prod
 
-# The base image already configures Nginx and PHP-FPM, so we don't need to do that here.
-# CMD ["php-fpm", "-F"] # Not needed, the base image handles this.
+# SQLite does not support isolation
+ENV SSL_MODE="off" \
+    PHP_OPCACHE_ENABLE="1" \
+    AUTORUN_ENABLED="true" \
+    AUTORUN_LARAVEL_MIGRATION_ISOLATION="false"
 
-# Optional:  If you need to run any other commands, such as seeding the database,
-# you can add them here.  For example:
-# RUN php artisan db:seed --force
+USER www-data
