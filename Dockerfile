@@ -19,6 +19,8 @@ FROM build AS ci
 # Copy the application files to the container.
 COPY --chown=www-data:www-data . /var/www/html
 
+RUN cp .env.example .env
+
 USER www-data
 
 ### DEV: specific to local (if any)
