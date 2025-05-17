@@ -16,11 +16,6 @@ RUN apk add --no-cache --virtual .build-deps g++ make \
 ### CI: specific to ci (if any)
 FROM build AS ci
 
-# Copy the application files to the container.
-COPY --chown=www-data:www-data . /var/www/html
-
-RUN cp .env.example .env
-
 USER www-data
 
 ### DEV: specific to local (if any)
@@ -30,6 +25,11 @@ USER www-data
 
 ### PROD - for deployment
 FROM base AS prod
+
+# Copy the application files to the container.
+COPY --chown=www-data:www-data . /var/www/html
+
+# RUN cp .env.example .env
 
 # SQLite does not support isolation
 ENV SSL_MODE="off" \
