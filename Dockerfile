@@ -36,7 +36,12 @@ COPY --chown=www-data:www-data . /var/www/html
 # commands (key:generate, migrate) explicitly later.
 RUN composer install --no-scripts --no-interaction --prefer-dist
 
-# RUN cp .env.example .env
+RUN cp .env.example .env
+
+# Generate the application key.  We do this *before* optimizing the autoloader.
+# If you have environment variables that affect key generation, set them
+# with ENV before this line.
+RUN php artisan key:generate --no-interaction
 
 # SQLite does not support isolation
 ENV SSL_MODE="off" \
